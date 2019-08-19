@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+     integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+     crossorigin=""/> 
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+      integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+      crossorigin=""></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script> 
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"> 
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">PawFinder</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="/final/home.html">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#"">Paws</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/final/history.html">History</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Dropdown
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="#">Action</a>
+              <a class="dropdown-item" href="#">Another action</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0">
+          <i id="notif-mqtt"  class="material-icons mr-4" style="color:red;display:none;">notification_important</i> 
+          <div class="nav-item mr-2" id="user-name"></div>
+          <button onClick="logout()"  class="btn btn-outline-danger my-2 my-sm-0" type="submit">Logout</button>
+        </form>
+      </div>
+    </nav> 
+
+    <div id="animals-list" class="d-flex flex-row"></div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+      cookieSplit = document.cookie.split(';');
+      console.log(cookieSplit);
+
+      let cookieFound = false;
+      let userId;
+      let userName;
+      let currentLat;
+      let currentLon;
+      let mymap;
+      let marker;
+
+      for(let cookie of cookieSplit) {
+        const cookieData = cookie.split('=');
+
+        console.log(cookieData);
+        if(cookieData[0] == 'user_id') {
+          if(cookieData[1] != '') {
+            cookieFound = true;
+            userId = cookieData[1];
+          }
+        }
+        
+        if(cookieFound) {
+          console.log('Found cookie and user data!');
+        }
+        else {
+          console.log('Cookie not found!');
+          window.location = '/final';
+        }
+      
+        $.ajax({
+          'url' : 'http://localhost:5000/user?user_id=' + userId,
+          'method' : 'GET',
+          'success' : function(data) {
+            console.log(data);
+            document.getElementById('user-name').innerText = data.name;
+          }
+        })
+
+        $.ajax({
+          'url' : 'http://localhost:5000/animals?user_id=' + userId,
+          'method' : 'GET',
+          'success' : function(data) {
+            console.log(data);
+            
+            let animalList = '';
+            
+            for(let animal of data) {
+              console.log(animal);
+              animalList += `<div class="card m-3" style="width:18rem;">`;
+              animalList += `<img class="card-img-top" src="${animal.url}" alt="Card image cap">`;
+              animalList += `<div class="card-body">`;
+              animalList += `<h5 class="card-title">${animal.name}</h5>`;
+              animalList += `</div>`;
+              animalList += `<ul class="list-group list-group-flush">`;
+              animalList += `<li class="list-group-item">${animal.animal_type}</li>`;
+              animalList += `</ul>`;
+              animalList += `</div>`;
+            }
+
+            document.getElementById('animals-list').innerHTML = animalList;
+          }
+        })
+
+        // Create a client instance
+        client = new Paho.MQTT.Client('0.0.0.0', Number(9001), "clientId");
+
+        // set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        // connect the client
+        client.connect({onSuccess:onConnect}); 
+        
+        function onConnect() { // Subs to userId channel
+          console.log('onConnect');
+          client.subscribe(userId);
+        }
+
+        function onConnectionLost(responseObject) {
+          if(responseObject.errorCode != 0) {
+            console.log('onConnectionLost:' + responseObject.errorMessage);
+          }
+        }
+
+        function onMessageArrived(message) {
+          console.log('onMessageArrived:' + message.payloadString);
+          
+          document.getElementById('notif-mqtt').style.display = 'block';
+
+          setTimeout(function() {
+            document.getElementById('notif-mqtt').style.display = 'none';
+          }, 250);
+          
+          $.ajax({
+            'url' : 'http://localhost:5000/location?user_id=' + userId,
+            'method' : 'GET',
+            'success' : function(data) {
+              console.log(data);
+              currentLat = data[0][0].latitude;
+              currentLon = data[0][0].longitude;
+
+              const rssi = data[0][0].rssi;
+              let signalStrength = (130-Math.abs(rssi))/130*100;
+              const dt = new Date(data[0][0].timestamp);
+
+              mymap.removeLayer(marker);
+              marker = L.marker([currentLat, currentLon]).addTo(mymap).bindPopup(`<div><meter value="${data[0][0].rssi}" min="-130" max="0"></meter></div><div>Signal: ${signalStrength}%</div><div>pwr=${rssi} min=-130</div><div>${dt}</div>`).openPopup();
+            }
+          })
+        }
+      }
+    </script>
+  </body>
+</html>

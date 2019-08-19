@@ -1,0 +1,16 @@
+how to get things working
+
+mongod
+
+cd ~/codes/python/flask
+python3 hello.py
+
+python3 mqtt_insert.py 1 -6.3460739 106.8628 -53
+
+cd ~/codes/python/serial
+python3 main.py /dev/ttyUSB*
+
+sudo systemctl start apache2
+
+http://localhost/final
+http://localhost/final/home.html

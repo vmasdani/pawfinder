@@ -1,0 +1,6 @@
+{"_id":{"$oid":"5d597c162f1e78c1479ef333"},"user_id":"5d5979c2ac37a6cad5722364","name":"Kyle","animal_type":"cat","pawfinder_id":1,"url":"https://upload.wikimedia.org/wikipedia/commons/6/66/An_up-close_picture_of_a_curious_male_domestic_shorthair_tabby_cat.jpg"}
+{"_id":{"$oid":"5d597c442f1e78c1479ef335"},"user_id":"5d5979c2ac37a6cad5722364","name":"Corri","animal_type":"dog","pawfinder_id":2,"url":"https://www.purina.com.au/-/media/Project/Purina/Main/Breeds/Dog/Mobile/Dog_Samoyed_Mobile.jpg?h=300&la=en&w=375&hash=EE6529E6036EFD00F71DA4045ED88F0D"}
+{"_id":{"$oid":"5d597c5b14d6aec5e8427e32"},"url":"https://i.ytimg.com/vi/X_jkHXbA0k4/hqdefault.jpg","animal_type":"cat","name":"Mangkudun","pawfinder_id":3.0,"user_id":"5d5979c2ac37a6cad5722364"}
+{"_id":{"$oid":"5d597c8714d6aec5e8427e35"},"user_id":"5d5979b0ac37a6cad5722362","name":"Bambang","animal_type":"cat","pawfinder_id":4}
+{"_id":{"$oid":"5d597c9f14d6aec5e8427e37"},"user_id":"5d5979b0ac37a6cad5722362","name":"Bajuri","animal_type":"dog","pawfinder_id":5}
+{"_id":{"$oid":"5d597cbf14d6aec5e8427e3a"},"user_id":"5d5979cdac37a6cad5722366","name":"Melissa","animal_type":"cat","pawfinder_id":6}
